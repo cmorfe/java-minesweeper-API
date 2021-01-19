@@ -2,7 +2,7 @@ package com.cmorfe.minesweeper.service;
 
 import com.cmorfe.minesweeper.entity.Board;
 import com.cmorfe.minesweeper.entity.Square;
-import com.cmorfe.minesweeper.exception.NoteNotFoundException;
+import com.cmorfe.minesweeper.exception.NotFoundException;
 import com.cmorfe.minesweeper.repository.BoardRepository;
 import com.cmorfe.minesweeper.repository.SquareRepository;
 import org.springframework.stereotype.Service;
@@ -63,7 +63,7 @@ public class SquareService {
 
     public Square open(long id) {
         Square square = repository.findById(id)
-                .orElseThrow(NoteNotFoundException::new);
+                .orElseThrow(NotFoundException::new);
 
         openSquare(square);
 
@@ -113,7 +113,7 @@ public class SquareService {
                     square.toggleMark();
                     return repository.save(square);
                 })
-                .orElseThrow(NoteNotFoundException::new);
+                .orElseThrow(NotFoundException::new);
 
     }
 

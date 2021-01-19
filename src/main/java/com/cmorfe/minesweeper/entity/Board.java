@@ -1,9 +1,12 @@
 package com.cmorfe.minesweeper.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.hateoas.EntityModel;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,6 +26,7 @@ public class Board {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     @Column(nullable = false)
@@ -41,10 +45,13 @@ public class Board {
     private int time;
 
     @OneToMany(mappedBy = "board")
+    @JsonIgnore
     private List<Square> squares;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    private ArrayList<List<EntityModel<Square>>> gameSquares;
 
     public Board(User user, int columns, int rows, int mines) {
         this.user = user;
@@ -109,6 +116,14 @@ public class Board {
 
     public void setTime(int time) {
         this.time = time;
+    }
+
+    public ArrayList<List<EntityModel<Square>>> getGameSquares() {
+        return gameSquares;
+    }
+
+    public void setGameSquares(ArrayList<List<EntityModel<Square>>> gameSquares) {
+        this.gameSquares = gameSquares;
     }
 
     public List<Square> getSquares() {

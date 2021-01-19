@@ -45,6 +45,8 @@ public class Square {
     @Column(nullable = false)
     private boolean mined;
 
+    private int adjacents;
+
     public long getId() {
         return id;
     }
@@ -99,5 +101,27 @@ public class Square {
 
     public void setMined(boolean mined) {
         this.mined = mined;
+    }
+
+    public int getAdjacents() {
+        return adjacents;
+    }
+
+    public void setAdjacents(int adjacents) {
+        this.adjacents = adjacents;
+    }
+
+    public void toggleMark() {
+        switch (mark) {
+            case NONE:
+                this.mark = Mark.FLAG;
+                break;
+            case FLAG:
+                this.mark = Mark.QUESTION;
+                break;
+            case QUESTION:
+                this.mark = Mark.NONE;
+                break;
+        }
     }
 }
