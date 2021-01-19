@@ -2,6 +2,7 @@ package com.cmorfe.minesweeper.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -16,6 +17,9 @@ public class User implements Serializable {
 
     @Column(nullable = false)
     private String password;
+
+    @OneToMany(mappedBy = "user")
+    private List<Board> boards;
 
     public long getId() {
         return id;
@@ -39,5 +43,13 @@ public class User implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public List<Board> getBoards() {
+        return boards;
+    }
+
+    public void setBoards(List<Board> boards) {
+        this.boards = boards;
     }
 }
