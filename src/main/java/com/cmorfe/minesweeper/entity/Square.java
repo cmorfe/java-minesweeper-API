@@ -1,5 +1,7 @@
 package com.cmorfe.minesweeper.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 
 @Entity
@@ -28,6 +30,7 @@ public class Square {
 
     @ManyToOne
     @JoinColumn(name="board_id", nullable=false)
+    @JsonIgnore
     private Board board;
 
     @Column(nullable = false)
@@ -45,6 +48,7 @@ public class Square {
     @Column(nullable = false)
     private boolean mined;
 
+    @Transient
     private int adjacents;
 
     public long getId() {

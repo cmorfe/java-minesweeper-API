@@ -51,6 +51,7 @@ public class Board {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @Transient
     private ArrayList<List<EntityModel<Square>>> gameSquares;
 
     public Board(User user, int columns, int rows, int mines) {

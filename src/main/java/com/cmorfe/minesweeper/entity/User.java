@@ -1,5 +1,7 @@
 package com.cmorfe.minesweeper.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
@@ -19,6 +21,7 @@ public class User implements Serializable {
     private String password;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Board> boards;
 
     public long getId() {
