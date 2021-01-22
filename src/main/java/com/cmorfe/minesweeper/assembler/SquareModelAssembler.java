@@ -21,7 +21,11 @@ public class SquareModelAssembler implements RepresentationModelAssembler<Square
     public @NotNull EntityModel<Square> toModel(@NotNull Square square) {
 
         if (square.isOpen()) {
-            square.setAdjacents(squareService.countMinedAdjacents(square));
+            int countMinedAdjacents = squareService.countMinedAdjacents(square);
+
+            square.setShouldReload(countMinedAdjacents == 0 || square.getBoard().getGameState() == Board.GameState.LOST);
+
+            square.setAdjacents(countMinedAdjacents);
         }
 
         if (square.getBoard().getGameState() != Board.GameState.LOST) {

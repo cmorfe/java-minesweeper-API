@@ -30,10 +30,10 @@ public class Board {
     private User user;
 
     @Column(nullable = false)
-    private int columns;
+    private int length;
 
     @Column(nullable = false)
-    private int rows;
+    private int height;
 
     @Column(nullable = false)
     private int mines;
@@ -54,10 +54,10 @@ public class Board {
     @Transient
     private ArrayList<List<EntityModel<Square>>> gameSquares;
 
-    public Board(User user, int columns, int rows, int mines) {
+    public Board(User user, int length, int height, int mines) {
         this.user = user;
-        this.columns = columns;
-        this.rows = rows;
+        this.length = length;
+        this.height = height;
         this.mines = mines;
         this.time = 0;
         this.gameState = GameState.ON;
@@ -79,20 +79,20 @@ public class Board {
         this.user = user;
     }
 
-    public int getColumns() {
-        return columns;
+    public int getLength() {
+        return length;
     }
 
-    public void setColumns(int columns) {
-        this.columns = columns;
+    public void setLength(int length) {
+        this.length = length;
     }
 
-    public int getRows() {
-        return rows;
+    public int getHeight() {
+        return height;
     }
 
-    public void setRows(int height) {
-        this.rows = height;
+    public void setHeight(int height) {
+        this.height = height;
     }
 
     public int getMines() {

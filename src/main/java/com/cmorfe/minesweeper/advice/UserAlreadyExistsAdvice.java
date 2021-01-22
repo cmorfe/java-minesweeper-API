@@ -12,7 +12,7 @@ public class UserAlreadyExistsAdvice {
     @ResponseBody
     @ExceptionHandler(UserAlreadyExistsException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    String userAlreadyExistsHandler(UserAlreadyExistsException ex) {
-        return ex.getMessage();
+    ResponseMessage userAlreadyExistsHandler(UserAlreadyExistsException ex) {
+        return new ResponseMessage(ex.getMessage());
     }
 }

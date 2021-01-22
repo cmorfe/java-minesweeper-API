@@ -8,10 +8,10 @@ import javax.persistence.*;
 @Table(name = "squares")
 public class Square {
 
-    public Square(Board board, int column, int row) {
+    public Square(Board board, int x, int y) {
         this.board = board;
-        this.column = column;
-        this.row = row;
+        this.x = x;
+        this.y = y;
         this.mark = Mark.NONE;
         this.open = false;
         this.mined = false;
@@ -34,10 +34,10 @@ public class Square {
     private Board board;
 
     @Column(nullable = false)
-    private int column;
+    private int x;
 
     @Column(nullable = false)
-    private int row;
+    private int y;
 
     @Enumerated(EnumType.STRING)
     private Mark mark;
@@ -50,6 +50,9 @@ public class Square {
 
     @Transient
     private int adjacents;
+
+    @Transient
+    private boolean shouldReload;
 
     public long getId() {
         return id;
@@ -67,20 +70,20 @@ public class Square {
         this.board = board;
     }
 
-    public int getColumn() {
-        return column;
+    public int getX() {
+        return x;
     }
 
-    public void setColumn(int column) {
-        this.column = column;
+    public void setX(int x) {
+        this.x = x;
     }
 
-    public int getRow() {
-        return row;
+    public int getY() {
+        return y;
     }
 
-    public void setRow(int row) {
-        this.row = row;
+    public void setY(int y) {
+        this.y = y;
     }
 
     public Mark getMark() {
@@ -113,6 +116,14 @@ public class Square {
 
     public void setAdjacents(int adjacents) {
         this.adjacents = adjacents;
+    }
+
+    public boolean isShouldReload() {
+        return shouldReload;
+    }
+
+    public void setShouldReload(boolean shouldReload) {
+        this.shouldReload = shouldReload;
     }
 
     public void toggleMark() {

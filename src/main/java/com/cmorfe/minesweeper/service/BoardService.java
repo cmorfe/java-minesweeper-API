@@ -25,16 +25,16 @@ public class BoardService {
         this.squareModelAssembler = squareModelAssembler;
     }
 
-    public Board store(User user, int columns, int rows, int mines) {
-        Board board = new Board(user, columns, rows, mines);
+    public Board store(User user, int length, int height, int mines) {
+        Board board = new Board(user, length, height, mines);
 
         boardRepository.save(board);
 
         List<Square> squares = new ArrayList<>();
 
-        for (int column = 0; column < columns; column++) {
-            for (int row = 0; row < rows; row++) {
-                Square square = new Square(board, column, row);
+        for (int i = 0; i < length; i++) {
+            for (int j = 0; j < height; j++) {
+                Square square = new Square(board, i, j);
 
                 squares.add(square);
 
@@ -49,19 +49,29 @@ public class BoardService {
         return board;
     }
 
+    public Board update(long id, Board newBoard) {
+        return boardRepository.findById(id)
+                .map(board -> {
+                    board.setTime(newBoard.getTime());
+                    return boardRepository.save(board);
+                })
+                .orElseThrow(NotFoundException::new);
+
+    }
+
     public Board gameSquares(Board board) {
         ArrayList<List<EntityModel<Square>>> gameSquares = new ArrayList<>();
 
         LinkedList<Square> squares = squareService.getGameSquares(board);
 
-        if (squares.size() != board.getColumns() * board.getRows()) {
+        if (squares.size() != board.getLength() * board.getHeight()) {
             throw new RuntimeException("Size mismatch");
         }
 
-        for (int column = 0; column < board.getColumns(); column++) {
+        for (int length = 0; length < board.getLength(); length++) {
             ArrayList<EntityModel<Square>> squareRow = new ArrayList<>();
 
-            for (int row = 0; row < board.getRows(); row++) {
+            for (int height = 0; height < board.getHeight(); height++) {
 
                 squareRow.add(squareModelAssembler.toModel(squares.pop()));
             }
@@ -79,8 +89,8 @@ public class BoardService {
                     .orElseThrow(NotFoundException::new);
     }
 
-    public List<Board> index() {
-        return (List<Board>) boardRepository.findAll();
+    public List<Board> index(User user) {
+        return (List<Board>) boardRepository.findByUserAndGameState(user, Board.GameState.ON);
     }
 
 }

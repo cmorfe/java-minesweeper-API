@@ -8,21 +8,23 @@ import java.util.LinkedList;
 import java.util.List;
 
 public interface SquareRepository extends CrudRepository<Square, Long> {
-    List<Square> findByBoardAndColumnBetweenAndRowBetween(
+    List<Square> findByBoardAndXBetweenAndYBetween(
             Board board,
-            int initColumn,
-            int finalColumn,
-            int initRow,
-            int finalRow
+            int x0,
+            int x1,
+            int y0,
+            int y1
     );
 
-    int countByBoardAndColumnBetweenAndRowBetweenAndMinedTrue(
+    int countByBoardAndXBetweenAndYBetweenAndMinedTrue(
             Board board,
-            int initColumn,
-            int finalColumn,
-            int initRow,
-            int finalRow
+            int x0,
+            int x1,
+            int y0,
+            int y1
     );
 
-    LinkedList<Square> findByBoardOrderByColumnDescRowDesc(Board board);
+    LinkedList<Square> findByBoardOrderByXAscYAsc(Board board);
+
+    int countByBoardAndMinedAndOpen(Board board, boolean mined, boolean open);
 }

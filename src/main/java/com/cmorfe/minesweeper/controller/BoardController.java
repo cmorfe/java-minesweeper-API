@@ -5,12 +5,10 @@ import com.cmorfe.minesweeper.assembler.BoardModelAssembler;
 import com.cmorfe.minesweeper.entity.Board;
 import com.cmorfe.minesweeper.entity.User;
 import com.cmorfe.minesweeper.service.BoardService;
-
 import com.cmorfe.minesweeper.service.UserAuthService;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.LinkRelation;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,6 +45,16 @@ public class BoardController {
         return assembler.toModel(board);
     }
 
+    @PostMapping("{id}")
+    public ResponseEntity<?> update(@RequestBody Board newBoard, @PathVariable Long id) {
+        Board board = service.update(id, newBoard);
+
+        EntityModel<Board> model = assembler.toModel(board);
+
+        return ResponseEntity
+                .accepted()
+                .body(model);
+    }
 
     @PostMapping()
     public ResponseEntity<?> store(@RequestBody Board board) {
@@ -54,18 +62,22 @@ public class BoardController {
 
         User user = userAuthService.findByUsername(auth.getName());
 
-        Board newBoard = service.store(user, board.getColumns(), board.getRows(), board.getMines());
+        Board newBoard = service.store(user, board.getLength(), board.getHeight(), board.getMines());
 
-        EntityModel<Board> entityModel = assembler.toModel(newBoard);
+        EntityModel<Board> model = assembler.toModel(newBoard);
 
         return ResponseEntity
-                .created(entityModel.getRequiredLink(LinkRelation.of("self")).toUri())
-                .body(entityModel);
+                .created(model.getRequiredLink(LinkRelation.of("self")).toUri())
+                .body(model);
     }
 
     @GetMapping()
     public CollectionModel<EntityModel<Board>> index() {
-        List<EntityModel<Board>> boards = service.index().stream()
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        User user = userAuthService.findByUsername(auth.getName());
+
+        List<EntityModel<Board>> boards = service.index(user).stream()
                 .map(assembler::toModel)
                 .collect(Collectors.toList());
 

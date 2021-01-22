@@ -17,10 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
-import static com.cmorfe.minesweeper.security.Constants.EXPIRATION_TIME;
-import static com.cmorfe.minesweeper.security.Constants.HEADER_STRING;
-import static com.cmorfe.minesweeper.security.Constants.SECRET;
-import static com.cmorfe.minesweeper.security.Constants.TOKEN_PREFIX;
+import static com.cmorfe.minesweeper.security.Constants.*;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
@@ -58,5 +55,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .sign(HMAC512(SECRET.getBytes()));
         res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
+        res.setHeader("Access-Control-Allow-Headers", "*");
+        res.setHeader("Access-Control-Expose-Headers", "Authorization");
     }
 }

@@ -28,11 +28,11 @@ public class SquareService {
     public List<Square> adjacents(Square square) {
         Board board = square.getBoard();
 
-        int column = square.getColumn();
+        int column = square.getX();
 
-        int row = square.getRow();
+        int row = square.getY();
 
-        return repository.findByBoardAndColumnBetweenAndRowBetween(
+        return repository.findByBoardAndXBetweenAndYBetween(
                 board,
                 column - 1,
                 column + 1,
@@ -44,11 +44,11 @@ public class SquareService {
     public int countMinedAdjacents(Square square) {
         Board board = square.getBoard();
 
-        int column = square.getColumn();
+        int column = square.getX();
 
-        int row = square.getRow();
+        int row = square.getY();
 
-        return repository.countByBoardAndColumnBetweenAndRowBetweenAndMinedTrue(
+        return repository.countByBoardAndXBetweenAndYBetweenAndMinedTrue(
                 board,
                 column - 1,
                 column + 1,
@@ -58,7 +58,7 @@ public class SquareService {
     }
 
     public LinkedList<Square> getGameSquares(Board board) {
-        return repository.findByBoardOrderByColumnDescRowDesc(board);
+        return repository.findByBoardOrderByXAscYAsc(board);
     }
 
     public Square open(long id) {
@@ -79,8 +79,9 @@ public class SquareService {
 
         repository.save(square);
 
+        Board board = square.getBoard();
+
         if (square.isMined()) {
-            Board board = square.getBoard();
 
             board.setGameState(Board.GameState.LOST);
 
@@ -98,6 +99,16 @@ public class SquareService {
                 }
             });
         }
+
+        if (countNotMinedOpenSquares(board) == 0) {
+            board.setGameState(Board.GameState.WON);
+
+            boardRepository.save(board);
+        }
+    }
+
+    private int countNotMinedOpenSquares(Board board) {
+        return repository.countByBoardAndMinedAndOpen(board, false, true);
     }
 
 
