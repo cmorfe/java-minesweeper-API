@@ -5,10 +5,10 @@ import com.cmorfe.minesweeper.entity.User;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface BoardRepository extends CrudRepository<Board, Long> {
-    List<Board> findByUserAndGameState(
-            User user,
-            Board.GameState gameState
-    );
+    Optional<Board> findByIdAndUser(long id, User user);
+
+    List<Board> findByUserAndGameState(User user, Board.GameState gameState);
 }

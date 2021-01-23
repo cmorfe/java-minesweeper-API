@@ -6,6 +6,7 @@ import com.cmorfe.minesweeper.entity.Square;
 import com.cmorfe.minesweeper.entity.User;
 import com.cmorfe.minesweeper.exception.NotFoundException;
 import com.cmorfe.minesweeper.repository.BoardRepository;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.stereotype.Service;
 
@@ -17,15 +18,28 @@ public class BoardService {
 
     private final SquareService squareService;
 
+    private final UserAuthService userAuthService;
+
     private final SquareModelAssembler squareModelAssembler;
 
-    public BoardService(BoardRepository boardRepository, SquareService squareService, SquareModelAssembler squareModelAssembler) {
+    public BoardService(
+            BoardRepository boardRepository,
+            SquareService squareService,
+            UserAuthService userAuthService,
+            SquareModelAssembler squareModelAssembler
+    ) {
         this.boardRepository = boardRepository;
+
         this.squareService = squareService;
+
+        this.userAuthService = userAuthService;
+
         this.squareModelAssembler = squareModelAssembler;
     }
 
-    public Board store(User user, int length, int height, int mines) {
+    public Board store(int length, int height, int mines) {
+        User user = userAuthService.authUser();
+
         Board board = new Board(user, length, height, mines);
 
         boardRepository.save(board);
@@ -34,11 +48,7 @@ public class BoardService {
 
         for (int i = 0; i < length; i++) {
             for (int j = 0; j < height; j++) {
-                Square square = new Square(board, i, j);
-
-                squares.add(square);
-
-                squareService.store(square);
+                storeSquare(squares, new Square(board, i, j));
             }
         }
 
@@ -49,14 +59,25 @@ public class BoardService {
         return board;
     }
 
+    private void storeSquare(List<Square> squares, Square square) {
+        squares.add(square);
+
+        squareService.store(square);
+    }
+
     public Board update(long id, Board newBoard) {
-        return boardRepository.findById(id)
-                .map(board -> {
-                    board.setTime(newBoard.getTime());
-                    return boardRepository.save(board);
-                })
+        User user = userAuthService.authUser();
+
+        return boardRepository.findByIdAndUser(id, user)
+                .map(board -> setTime(newBoard, board))
                 .orElseThrow(NotFoundException::new);
 
+    }
+
+    @NotNull
+    private Board setTime(Board newBoard, Board board) {
+        board.setTime(newBoard.getTime());
+        return boardRepository.save(board);
     }
 
     public Board gameSquares(Board board) {
@@ -85,12 +106,15 @@ public class BoardService {
     }
 
     public Board show(Long id) {
-            return boardRepository.findById(id)
-                    .orElseThrow(NotFoundException::new);
+        User user = userAuthService.authUser();
+
+        return boardRepository.findByIdAndUser(id, user)
+                .orElseThrow(NotFoundException::new);
     }
 
-    public List<Board> index(User user) {
-        return (List<Board>) boardRepository.findByUserAndGameState(user, Board.GameState.ON);
-    }
+    public List<Board> index() {
+        User user = userAuthService.authUser();
 
+        return boardRepository.findByUserAndGameState(user, Board.GameState.ON);
+    }
 }

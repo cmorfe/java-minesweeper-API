@@ -17,11 +17,13 @@ import static com.cmorfe.minesweeper.security.Constants.SIGN_UP_URL;
 
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
-    private final UserAuthService service;
+    private final UserAuthService userAuthService;
+
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public WebSecurity(UserAuthService service, BCryptPasswordEncoder bCryptPasswordEncoder) {
-        this.service = service;
+    public WebSecurity(UserAuthService userAuthService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+        this.userAuthService = userAuthService;
+
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
@@ -45,7 +47,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(service).passwordEncoder(bCryptPasswordEncoder);
+        auth.userDetailsService(userAuthService).passwordEncoder(bCryptPasswordEncoder);
     }
 
     @Bean

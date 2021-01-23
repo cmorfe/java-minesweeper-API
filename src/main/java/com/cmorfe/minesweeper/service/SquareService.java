@@ -2,9 +2,11 @@ package com.cmorfe.minesweeper.service;
 
 import com.cmorfe.minesweeper.entity.Board;
 import com.cmorfe.minesweeper.entity.Square;
+import com.cmorfe.minesweeper.entity.User;
 import com.cmorfe.minesweeper.exception.NotFoundException;
 import com.cmorfe.minesweeper.repository.BoardRepository;
 import com.cmorfe.minesweeper.repository.SquareRepository;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
@@ -12,57 +14,55 @@ import java.util.List;
 
 @Service
 public class SquareService {
-    private final SquareRepository repository;
+    private final SquareRepository squareRepository;
+
+    private final UserAuthService userAuthService;
 
     private final BoardRepository boardRepository;
 
-    public SquareService(SquareRepository repository, BoardRepository boardRepository) {
-        this.repository = repository;
+    public SquareService(SquareRepository squareRepository, UserAuthService userAuthService, BoardRepository boardRepository) {
+        this.squareRepository = squareRepository;
+
+        this.userAuthService = userAuthService;
+
         this.boardRepository = boardRepository;
     }
 
-    public Square store(Square square) {
-        return repository.save(square);
+    public void store(Square square) {
+        squareRepository.save(square);
     }
 
     public List<Square> adjacents(Square square) {
         Board board = square.getBoard();
 
-        int column = square.getX();
+        int x = square.getX();
 
-        int row = square.getY();
+        int y = square.getY();
 
-        return repository.findByBoardAndXBetweenAndYBetween(
-                board,
-                column - 1,
-                column + 1,
-                row - 1,
-                row + 1
-        );
+        return squareRepository.findByBoardAndXBetweenAndYBetween(board, x - 1, x + 1, y - 1, y + 1);
     }
 
     public int countMinedAdjacents(Square square) {
         Board board = square.getBoard();
 
-        int column = square.getX();
+        int x = square.getX();
 
-        int row = square.getY();
+        int y = square.getY();
 
-        return repository.countByBoardAndXBetweenAndYBetweenAndMinedTrue(
-                board,
-                column - 1,
-                column + 1,
-                row - 1,
-                row + 1
-        );
+        return squareRepository.countByBoardAndXBetweenAndYBetweenAndMinedTrue(board, x - 1, x + 1, y - 1, y + 1);
     }
 
     public LinkedList<Square> getGameSquares(Board board) {
-        return repository.findByBoardOrderByXAscYAsc(board);
+        return squareRepository.findByBoardOrderByXAscYAsc(board);
     }
 
-    public Square open(long id) {
-        Square square = repository.findById(id)
+    public Square open(long boardId, long id) {
+        User user = userAuthService.authUser();
+
+        Board board = boardRepository.findByIdAndUser(boardId, user)
+                .orElseThrow(NotFoundException::new);
+
+        Square square = squareRepository.findByIdAndBoard(id, board)
                 .orElseThrow(NotFoundException::new);
 
         openSquare(square);
@@ -77,7 +77,7 @@ public class SquareService {
 
         square.setOpen(true);
 
-        repository.save(square);
+        squareRepository.save(square);
 
         Board board = square.getBoard();
 
@@ -108,24 +108,32 @@ public class SquareService {
     }
 
     private int countNotMinedOpenSquares(Board board) {
-        return repository.countByBoardAndMinedAndOpen(board, false, true);
+        return squareRepository.countByBoardAndMinedAndOpen(board, false, true);
     }
-
 
     public void mine(Square square) {
         square.setMined(true);
 
-        repository.save(square);
+        squareRepository.save(square);
     }
 
-    public Square mark(long id) {
-        return repository.findById(id)
-                .map(square -> {
-                    square.toggleMark();
-                    return repository.save(square);
-                })
+    public Square mark(long boardId, long id) {
+        User user = userAuthService.authUser();
+
+        Board board = boardRepository.findByIdAndUser(boardId, user)
                 .orElseThrow(NotFoundException::new);
 
+        return squareRepository.findByIdAndBoard(id, board)
+                .map(this::toggleMark)
+                .orElseThrow(NotFoundException::new);
+
+    }
+
+    @NotNull
+    private Square toggleMark(Square square) {
+        square.toggleMark();
+
+        return squareRepository.save(square);
     }
 
 }

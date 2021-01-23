@@ -17,22 +17,22 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping()
 public class AuthController {
 
-    private final UserAuthService service;
+    private final UserAuthService userAuthService;
 
-    public AuthController(UserAuthService service) {
-        this.service = service;
+    public AuthController(UserAuthService userAuthService) {
+        this.userAuthService = userAuthService;
     }
 
     @PostMapping("signin")
     public ResponseEntity<Object> signin(@RequestBody User user) {
-        service.signin(user);
+        userAuthService.signin(user);
 
         return new ResponseEntity<>(null, HttpStatus.CREATED);
     }
 
     @PostMapping("signout")
     public ResponseEntity<Object> signout(HttpServletRequest request, HttpServletResponse response) {
-        service.signout(request, response);
+        userAuthService.signout(request, response);
 
         return new ResponseEntity<>(null, HttpStatus.OK);
     }

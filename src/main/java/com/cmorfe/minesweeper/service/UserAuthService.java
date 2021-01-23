@@ -2,9 +2,9 @@ package com.cmorfe.minesweeper.service;
 
 import com.cmorfe.minesweeper.exception.UserAlreadyExistsException;
 import com.cmorfe.minesweeper.repository.UserRepository;
+import com.cmorfe.minesweeper.entity.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,45 +19,42 @@ import static java.util.Collections.emptyList;
 
 @Service
 public class UserAuthService implements UserDetailsService {
-    private final UserRepository repository;
+    private final UserRepository userRepository;
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public UserAuthService(UserRepository repository, BCryptPasswordEncoder bCryptPasswordEncoder) {
-        this.repository = repository;
+    public UserAuthService(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+        this.userRepository = userRepository;
 
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        com.cmorfe.minesweeper.entity.User user = repository.findByUsername(username);
+        User user = findByUsername(username);
 
-        if (user == null) {
-            throw new UsernameNotFoundException(username);
-        }
-
-        return new User(user.getUsername(), user.getPassword(), emptyList());
+        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), emptyList());
     }
 
-    public com.cmorfe.minesweeper.entity.User findByUsername(String username) throws UsernameNotFoundException {
-        com.cmorfe.minesweeper.entity.User user = repository.findByUsername(username);
+    public User authUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (user == null) {
-            throw new UsernameNotFoundException(username);
-        }
-
-        return user;
+        return findByUsername(auth.getName());
     }
 
-    public void signin(com.cmorfe.minesweeper.entity.User user) throws UserAlreadyExistsException {
+    public User findByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
+    }
+
+    public void signin(User user) {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 
-        if (repository.findByUsername(user.getUsername()) != null) {
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new UserAlreadyExistsException();
         }
 
-        repository.save(user);
+        userRepository.save(user);
     }
 
     public void signout(HttpServletRequest request, HttpServletResponse response) {
