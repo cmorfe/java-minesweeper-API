@@ -23,7 +23,7 @@ public class SquareModelAssembler implements RepresentationModelAssembler<Square
         if (square.isOpen()) {
             int countMinedAdjacents = squareService.countMinedAdjacents(square);
 
-            square.setShouldReload(countMinedAdjacents == 0 || square.getBoard().getGameState() == Board.GameState.LOST);
+            square.setShouldReload(countMinedAdjacents == 0 || square.getBoard().getGameState() != Board.GameState.ON);
 
             square.setAdjacents(countMinedAdjacents);
         }

@@ -71,21 +71,16 @@ public class SquareService {
     }
 
     public void openSquare(Square square) {
-        if (square.isOpen() || square.getMark() == Square.Mark.FLAG) {
+        Board board = square.getBoard();
+
+        if (square.isOpen() || square.getMark() == Square.Mark.FLAG || board.getGameState() != Board.GameState.ON) {
             return;
         }
 
-        square.setOpen(true);
-
-        squareRepository.save(square);
-
-        Board board = square.getBoard();
+        setOpenSquare(square);
 
         if (square.isMined()) {
-
-            board.setGameState(Board.GameState.LOST);
-
-            boardRepository.save(board);
+            setGameLost(board);
 
             return;
         }
@@ -100,15 +95,31 @@ public class SquareService {
             });
         }
 
-        if (countNotMinedOpenSquares(board) == 0) {
-            board.setGameState(Board.GameState.WON);
-
-            boardRepository.save(board);
+        if (countNotMinedClosedSquares(board) == 0) {
+            setGameWon(board);
         }
     }
 
-    private int countNotMinedOpenSquares(Board board) {
-        return squareRepository.countByBoardAndMinedAndOpen(board, false, true);
+    private void setGameWon(Board board) {
+        board.setGameState(Board.GameState.WON);
+
+        boardRepository.save(board);
+    }
+
+    private void setGameLost(Board board) {
+        board.setGameState(Board.GameState.LOST);
+
+        boardRepository.save(board);
+    }
+
+    private void setOpenSquare(Square square) {
+        square.setOpen(true);
+
+        squareRepository.save(square);
+    }
+
+    private int countNotMinedClosedSquares(Board board) {
+        return squareRepository.countByBoardAndMinedAndOpen(board, false, false);
     }
 
     public void mine(Square square) {
@@ -123,10 +134,14 @@ public class SquareService {
         Board board = boardRepository.findByIdAndUser(boardId, user)
                 .orElseThrow(NotFoundException::new);
 
-        return squareRepository.findByIdAndBoard(id, board)
-                .map(this::toggleMark)
+        Square square = squareRepository.findByIdAndBoard(id, board)
                 .orElseThrow(NotFoundException::new);
 
+        if (board.getGameState() != Board.GameState.ON) {
+            return square;
+        }
+
+        return toggleMark(square);
     }
 
     @NotNull
