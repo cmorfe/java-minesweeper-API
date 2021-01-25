@@ -4,17 +4,14 @@ package com.cmorfe.minesweeper.controller;
 import com.cmorfe.minesweeper.assembler.BoardModelAssembler;
 import com.cmorfe.minesweeper.entity.Board;
 import com.cmorfe.minesweeper.service.BoardService;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("boards")
@@ -60,12 +57,7 @@ public class BoardController {
     }
 
     @GetMapping()
-    public CollectionModel<EntityModel<Board>> index() {
-        List<EntityModel<Board>> boards = boardService.index().stream()
-                .map(boardModelAssembler::toModel)
-                .collect(Collectors.toList());
-
-        return CollectionModel.of(boards,
-                linkTo(methodOn(BoardController.class).index()).withSelfRel());
+    public List<Board> index() {
+        return boardService.index();
     }
 }
