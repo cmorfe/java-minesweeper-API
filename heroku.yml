@@ -1,0 +1,9 @@
+setup:
+  addons:
+    - plan: cleardb
+      as: DATABASE
+build:
+  docker:
+    api: Dockerfile
+run:
+  api: java -Xmx256m -Xss512k -jar app.jar
