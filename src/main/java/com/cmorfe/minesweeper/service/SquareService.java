@@ -137,7 +137,7 @@ public class SquareService {
         Square square = squareRepository.findByIdAndBoard(id, board)
                 .orElseThrow(NotFoundException::new);
 
-        if (board.getGameState() != Board.GameState.ON) {
+        if (board.getGameState() != Board.GameState.ON || square.isOpen()) {
             return square;
         }
 
