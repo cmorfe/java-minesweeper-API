@@ -43,11 +43,11 @@ public class Swagger {
 
     private ApiInfo getApiInfo() {
         return new ApiInfo(
-                "Note Service API",
-                "Note Service API Description",
+                "Minesweeper API",
+                "Minesweeper API Description",
                 "1.0",
-                "http://notes.com/terms",
-                new Contact("Carlos Morfe", "https://cmorfe.com", "carlos@cmorfe.com"),
+                "http://minesweeper.com/terms",
+                new Contact("Carlos Morfe", "httpss://github.com/cmorfe", "cmorfe@gmail.com"),
                 "LICENSE",
                 "LICENSE URL",
                 Collections.emptyList()
